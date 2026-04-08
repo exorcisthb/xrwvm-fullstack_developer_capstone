@@ -8,4 +8,6 @@ urlpatterns = [
     # path for login
     path(route='login', view=views.login_user, name='login'),
     path(route='logout', view=views.logout_user, name='logout'),
+    # path for fetchReviews
+    path(route='fetchReviews/dealer/<int:dealer_id>', view=views.get_dealer_reviews, name='fetchReviews'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
