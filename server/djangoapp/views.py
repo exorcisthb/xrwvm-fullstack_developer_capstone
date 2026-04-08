@@ -1,5 +1,4 @@
 # Uncomment the required imports before adding the code
-
 # from django.shortcuts import render
 # from django.http import HttpResponseRedirect, HttpResponse
 # from django.contrib.auth.models import User
@@ -7,7 +6,6 @@
 # from django.contrib.auth import logout
 # from django.contrib import messages
 # from datetime import datetime
-
 from django.http import JsonResponse
 from django.contrib.auth import login, authenticate
 import logging
@@ -15,13 +13,10 @@ import json
 from django.views.decorators.csrf import csrf_exempt
 # from .populate import initiate
 
-
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 
-
 # Create your views here.
-
 # Create a `login_request` view to handle sign in request
 @csrf_exempt
 def login_user(request):
@@ -53,8 +48,26 @@ def login_user(request):
 # ...
 
 # Create a `get_dealer_reviews` view to render the reviews of a dealer
-# def get_dealer_reviews(request,dealer_id):
-# ...
+def get_dealer_reviews(request, dealer_id):
+    if dealer_id:
+        from .models import CarDealerReview
+        reviews = CarDealerReview.objects.filter(dealership=dealer_id)
+        reviews_doc = []
+        for review in reviews:
+            reviews_doc.append({
+                "id": review.id,
+                "name": review.name,
+                "dealership": review.dealership,
+                "review": review.review,
+                "purchase": review.purchase,
+                "purchase_date": str(review.purchase_date),
+                "car_make": review.car_make,
+                "car_model": review.car_model,
+                "car_year": review.car_year,
+                "sentiment": review.sentiment,
+            })
+        return JsonResponse({"reviews": reviews_doc})
+    return JsonResponse({"reviews": []})
 
 # Create a `get_dealer_details` view to render the dealer details
 # def get_dealer_details(request, dealer_id):
