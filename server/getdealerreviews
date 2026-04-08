@@ -1,0 +1,4 @@
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   244  100   244    0     0  50082      0 --:--:-- --:--:-- --:--:-- 61000
+{"reviews": [{"id": 1, "name": "John Doe", "dealership": 1, "review": "Great service and friendly staff!", "purchase": true, "purchase_date": "2024-01-15", "car_make": "Toyota", "car_model": "Camry", "car_year": 2022, "sentiment": "positive"}]}

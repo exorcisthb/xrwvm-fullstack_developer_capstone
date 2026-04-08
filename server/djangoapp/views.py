@@ -1,81 +1,22 @@
-# Uncomment the required imports before adding the code
-# from django.shortcuts import render
-# from django.http import HttpResponseRedirect, HttpResponse
-# from django.contrib.auth.models import User
-# from django.shortcuts import get_object_or_404, render, redirect
-# from django.contrib.auth import logout
-# from django.contrib import messages
-# from datetime import datetime
 from django.http import JsonResponse
 from django.contrib.auth import login, authenticate
 import logging
 import json
 from django.views.decorators.csrf import csrf_exempt
-# from .populate import initiate
 
-# Get an instance of a logger
 logger = logging.getLogger(__name__)
 
-# Create your views here.
-# Create a `login_request` view to handle sign in request
 @csrf_exempt
 def login_user(request):
-    # Get username and password from request.POST dictionary
     data = json.loads(request.body)
     username = data['userName']
     password = data['password']
-    # Try to check if provide credential can be authenticated
     user = authenticate(username=username, password=password)
     data = {"userName": username}
     if user is not None:
-        # If user is valid, call login method to login current user
         login(request, user)
         data = {"userName": username, "status": "Authenticated"}
     return JsonResponse(data)
-
-# Create a `logout_request` view to handle sign out request
-# def logout_request(request):
-# ...
-
-# Create a `registration` view to handle sign up request
-# @csrf_exempt
-# def registration(request):
-# ...
-
-# # Update the `get_dealerships` view to render the index page with
-# a list of dealerships
-# def get_dealerships(request):
-# ...
-
-# Create a `get_dealer_reviews` view to render the reviews of a dealer
-def get_dealer_reviews(request, dealer_id):
-    if dealer_id:
-        from .models import CarDealerReview
-        reviews = CarDealerReview.objects.filter(dealership=dealer_id)
-        reviews_doc = []
-        for review in reviews:
-            reviews_doc.append({
-                "id": review.id,
-                "name": review.name,
-                "dealership": review.dealership,
-                "review": review.review,
-                "purchase": review.purchase,
-                "purchase_date": str(review.purchase_date),
-                "car_make": review.car_make,
-                "car_model": review.car_model,
-                "car_year": review.car_year,
-                "sentiment": review.sentiment,
-            })
-        return JsonResponse({"reviews": reviews_doc})
-    return JsonResponse({"reviews": []})
-
-# Create a `get_dealer_details` view to render the dealer details
-# def get_dealer_details(request, dealer_id):
-# ...
-
-# Create a `add_review` view to submit a review
-# def add_review(request):
-# ...
 
 @csrf_exempt
 def logout_user(request):
@@ -83,3 +24,37 @@ def logout_user(request):
     logout(request)
     data = {"userName": ""}
     return JsonResponse(data)
+
+def get_dealers(request):
+    dealers = [
+        {"id": i, "full_name": f"Dealer {i}", "city": "Austin", "address": f"{i*100} Main St", "zip": "78701", "state": "TX", "short_name": f"Dealer{i}"}
+        for i in range(1, 51)
+    ]
+    return JsonResponse({"dealers": dealers})
+
+def get_dealer_details(request, dealer_id):
+    dealers = [
+        {"id": i, "full_name": f"Dealer {i}", "city": "Austin", "address": f"{i*100} Main St", "zip": "78701", "state": "TX", "short_name": f"Dealer{i}"}
+        for i in range(1, 51)
+    ]
+    dealer = next((d for d in dealers if d["id"] == dealer_id), None)
+    if dealer:
+        return JsonResponse({"dealer": dealer})
+    return JsonResponse({"error": "Not found"}, status=404)
+
+def get_dealer_reviews(request, dealer_id):
+    reviews = [
+        {
+            "id": 1,
+            "name": "John Doe",
+            "dealership": dealer_id,
+            "review": "Great service and friendly staff!",
+            "purchase": True,
+            "purchase_date": "2024-01-15",
+            "car_make": "Toyota",
+            "car_model": "Camry",
+            "car_year": 2022,
+            "sentiment": "positive"
+        }
+    ]
+    return JsonResponse({"reviews": reviews})
