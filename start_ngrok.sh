@@ -6,8 +6,15 @@ set -e
 
 cd ~/xrwvm-fullstack_developer_capstone
 
+# Find user site-packages where pip installed the packages
+USER_SITE=$(python3 -c "import site; print(site.getusersitepackages())" 2>/dev/null)
+USER_BASE=$(python3 -c "import site; print(site.getuserbase())" 2>/dev/null)
+export PATH="$USER_BASE/bin:$PATH"
+export PYTHONPATH="$USER_SITE:$PYTHONPATH"
+
 # Start Django in the background
 echo "=== Starting Django on port 8000 ==="
+echo "PYTHONPATH=$PYTHONPATH"
 cd server
 nohup python3 manage.py runserver 0.0.0.0:8000 > ~/django.log 2>&1 &
 DJANGO_PID=$!
