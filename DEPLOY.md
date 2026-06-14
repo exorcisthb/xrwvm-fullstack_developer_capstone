@@ -2,72 +2,106 @@
 
 This guide explains how to deploy the Django app for Tasks 24-28.
 
+## IMPORTANT CONFIGURATION
+
+This repo is set up to deploy from the **root directory** (not from `server/`):
+- `build.sh` at the repo root runs `pip install -r requirements.txt`, then `cd server && python manage.py collectstatic/migrate`
+- `requirements.txt` at the repo root is a copy of `server/requirements.txt`
+- `render.yaml` is at the repo root
+- `Procfile` inside `server/` is also kept for Heroku compatibility
+
+The Django `settings.py` already has:
+- `ALLOWED_HOSTS = ['*']`
+- `STATIC_ROOT = BASE_DIR / 'staticfiles'`
+- `whitenoise` in `MIDDLEWARE` for serving static files
+
+---
+
 ## Option 1: Render.com (recommended, free tier)
 
-1. Push this repository to GitHub (you must have done this for Task 1 already).
-2. Go to https://render.com and sign in.
-3. Click **New +** → **Web Service**.
-4. Connect your GitHub repo.
-5. Configure:
-   - **Root Directory:** `server`
-   - **Build Command:** `pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate`
-   - **Start Command:** `gunicorn djangoproject.wsgi --log-file -`
-   - **Instance Type:** Free
-6. Click **Create Web Service**.
-7. Wait for the deploy to finish; copy the public URL (e.g. `https://capstone-cardealer.onrender.com`).
-8. After deploy, open a shell in Render and run:
+### Step-by-step
+
+1. Make sure your latest code is pushed to GitHub:
    ```bash
-   python manage.py seed_data
-   python manage.py createsuperuser   # optional
+   git push origin main
    ```
-9. Save the URL in `deploymentURL.txt`.
-10. On your local machine, capture the deployment screenshots:
+
+2. Go to https://render.com and sign in (with GitHub).
+
+3. Click **New +** → **Web Service**.
+
+4. Choose **Build and deploy from a Git repository** → **Next**.
+
+5. Find your repo `xrwvm-fullstack_developer_capstone` and click **Connect**.
+
+6. Fill in:
+   - **Name:** `cardealer-capstone` (or any name)
+   - **Region:** Oregon (US West) - free tier default
+   - **Branch:** `main`
+   - **Root Directory:** *(leave empty)*
+   - **Runtime:** `Python 3`
+   - **Build Command:** `bash build.sh`
+   - **Start Command:** `cd server && gunicorn djangoproject.wsgi:application --log-file -`
+   - **Instance Type:** `Free`
+
+7. Click **Deploy Web Service**.
+
+8. Watch the **Logs** tab. Build takes 2-5 minutes. When you see
+   `==> Your service is live 🎉`, the deploy is done.
+
+9. Copy the URL at the top, e.g. `https://cardealer-capstone.onrender.com`.
+   Save it in `deploymentURL.txt`.
+
+10. Open a Shell in Render (left menu → Shell) and seed data:
+    ```bash
+    cd server
+    python manage.py seed_data
+    ```
+    (If you skip this, the page will be empty.)
+
+11. Take screenshots (Task 25-28):
     ```powershell
-    $env:DEPLOY_URL = "https://capstone-cardealer.onrender.com"
+    $env:DEPLOY_URL = "https://cardealer-capstone.onrender.com"
     python capture_deployment_screenshots.py
     ```
-    This will create:
-    - `deployed_landingpage.png`  (Task 25)
-    - `deployed_loggedin.png`     (Task 26)
-    - `deployed_dealer_detail.png`(Task 27)
-    - `deployed_add_review.png`   (Task 28)
 
-## Option 2: Railway.app (free tier)
+---
 
-1. Push to GitHub.
-2. Go to https://railway.app → **New Project** → **Deploy from GitHub Repo**.
-3. Set **Root Directory** to `server`.
-4. Railway auto-detects the `Procfile` and `runtime.txt`.
-5. After deploy, run in the Railway shell:
-   ```bash
-   python manage.py migrate
-   python manage.py seed_data
-   ```
-6. Click **Generate Domain** to get a public URL.
-7. Save the URL in `deploymentURL.txt` and capture screenshots (see step 10 above).
+## What `build.sh` does
 
-## Option 3: Heroku
+```bash
+#!/usr/bin/env bash
+set -o errexit
+pip install --upgrade pip
+pip install -r requirements.txt
+cd server
+python manage.py check
+python manage.py migrate --noinput
+python manage.py collectstatic --noinput
+```
 
-1. Install Heroku CLI: https://devcenter.heroku.com/articles/heroku-cli
-2. ```bash
-   heroku login
-   heroku create capstone-cardealer
-   heroku config:set DJANGO_SETTINGS_MODULE=djangoproject.settings
-   git subtree push --prefix server heroku main
-   heroku run python manage.py migrate
-   heroku run python manage.py seed_data
-   ```
-3. Visit `https://capstone-cardealer.herokuapp.com` to confirm.
+This is also the same sequence the GitHub Actions workflow runs in CI, so
+what passes in CI will pass on Render.
+
+---
 
 ## Required Files (already in this repo)
 
-- `server/Procfile` - process declaration for gunicorn
+- `build.sh` - build script for Render
+- `render.yaml` - Render Blueprint (alternative way to deploy)
+- `requirements.txt` - root-level dependencies
+- `server/Procfile` - process declaration (Heroku/Railway compatible)
 - `server/runtime.txt` - Python version pin
-- `server/requirements.txt` - dependencies
-- `server/djangoproject/settings.py` - configured with `ALLOWED_HOSTS = ['*']` and `whitenoise` for static files
+- `server/requirements.txt` - duplicate of root requirements.txt
+- `server/djangoproject/settings.py` - already configured
+
+---
 
 ## Notes
 
-- The default database is SQLite (great for free deploys). For production, switch to PostgreSQL.
-- Static files are served by `whitenoise`, so no extra CDN needed.
-- For the screenshots to display the user is logged in, you must first run `seed_data` so the `testuser` account exists.
+- Default database is SQLite (perfect for free deploys).
+- Static files served by `whitenoise`, no extra CDN needed.
+- For the `deployed_loggedin.png` screenshot to show `testuser`, you must run
+  `python manage.py seed_data` so that user exists in the deployed database.
+- Free Render instances sleep after 15 minutes of inactivity; the first
+  request will take ~30s to wake up.
