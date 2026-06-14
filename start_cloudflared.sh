@@ -12,6 +12,12 @@ if ! python3 -c "import django" 2>/dev/null; then
     exit 1
 fi
 
+# Kill any prior Django/cloudflared on port 8000
+echo "=== Cleaning up old processes on port 8000 ==="
+pkill -f "manage.py runserver" 2>/dev/null || true
+pkill -f cloudflared 2>/dev/null || true
+sleep 2
+
 # Start Django in background
 echo "=== Starting Django on port 8000 ==="
 cd server
