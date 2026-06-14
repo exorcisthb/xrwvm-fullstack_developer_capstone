@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: cardealer-capstone
+    runtime: python
+    plan: free
+    buildCommand: bash build.sh
+    startCommand: cd server && gunicorn djangoproject.wsgi:application --log-file -
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.10
+      - key: WEB_CONCURRENCY
+        value: 2
