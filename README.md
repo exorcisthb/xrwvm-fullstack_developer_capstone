@@ -1,5 +1,7 @@
 # Capstone Project - Car Dealership Review Platform
 
+[![Django CI/CD](https://github.com/exorcisthb/capstone-car-dealership/actions/workflows/django-ci-cd.yml/badge.svg)](https://github.com/exorcisthb/capstone-car-dealership/actions/workflows/django-ci-cd.yml)
+
 ## Project Name
 **Car Dealership Review Platform**
 
