@@ -16,10 +16,13 @@ cd xrwvm-fullstack_developer_capstone
 echo "=== [2/6] Pulling latest changes ==="
 git pull origin main
 
-echo "=== [3/6] Installing Python dependencies (system-wide) ==="
-# venv has issues on this lab - use system python directly
-python3 -m pip install --quiet --user --upgrade pip
-python3 -m pip install --quiet --user -r server/requirements.txt
+echo "=== [3/6] Installing Python dependencies ==="
+# IMPORTANT: lab has python3 (3.10) as default, with old pip.
+# --break-system-packages is needed for modern pip on system Python.
+python3 -m pip install --quiet --break-system-packages --upgrade pip
+python3 -m pip install --quiet --break-system-packages -r server/requirements.txt
+# Sanity check
+python3 -c "import django; print('Django version:', django.__version__)" || { echo "Django install FAILED"; exit 1; }
 
 echo "=== [4/6] Running migrations and seeding data ==="
 cd server

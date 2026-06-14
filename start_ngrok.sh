@@ -6,15 +6,14 @@ set -e
 
 cd ~/xrwvm-fullstack_developer_capstone
 
-# Find user site-packages where pip installed the packages
-USER_SITE=$(python3 -c "import site; print(site.getusersitepackages())" 2>/dev/null)
-USER_BASE=$(python3 -c "import site; print(site.getuserbase())" 2>/dev/null)
-export PATH="$USER_BASE/bin:$PATH"
-export PYTHONPATH="$USER_SITE:$PYTHONPATH"
+# Sanity check: confirm Django is importable
+if ! python3 -c "import django" 2>/dev/null; then
+    echo "ERROR: Django not installed for python3. Run: bash lab_setup.sh"
+    exit 1
+fi
 
 # Start Django in the background
 echo "=== Starting Django on port 8000 ==="
-echo "PYTHONPATH=$PYTHONPATH"
 cd server
 nohup python3 manage.py runserver 0.0.0.0:8000 > ~/django.log 2>&1 &
 DJANGO_PID=$!
@@ -27,7 +26,13 @@ if ! kill -0 $DJANGO_PID 2>/dev/null; then
     tail -20 ~/django.log
     exit 1
 fi
-echo "Django is running at http://localhost:8000"
+# Verify Django is responding
+if curl -sf http://localhost:8000/ -o /dev/null; then
+    echo "Django is running at http://localhost:8000"
+else
+    echo "WARNING: Django started but is not responding. Last log lines:"
+    tail -20 ~/django.log
+fi
 
 cd ..
 
