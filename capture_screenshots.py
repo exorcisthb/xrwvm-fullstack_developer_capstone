@@ -95,7 +95,11 @@ async def main():
 
         # -------- Task 22: added_review.png --------
         await page.click('button[type="submit"]')
-        await page.wait_for_timeout(2500)
+        # Wait longer and force a fresh navigation to bypass any cache
+        await page.wait_for_timeout(3000)
+        cache_bust = int(__import__('time').time() * 1000)
+        await page.goto(f"{BASE}/djangoapp/dealer/1/?_t={cache_bust}", wait_until="networkidle")
+        await page.wait_for_timeout(1500)
         await add_url_banner(page, "Review posted - dealer detail page")
         await page.screenshot(path=os.path.join(OUT, "added_review.png"), full_page=True)
         print("[OK] added_review.png (Task 22)")
