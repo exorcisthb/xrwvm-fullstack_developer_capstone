@@ -1,20 +1,18 @@
 #!/usr/bin/env bash
 # ============================================================
 # Start Django + ngrok for public URL
-# Requires NGROK_AUTHTOKEN env var (free signup at ngrok.com)
 # ============================================================
 set -e
 
 cd ~/xrwvm-fullstack_developer_capstone
-source .venv/bin/activate
 
 # Start Django in the background
 echo "=== Starting Django on port 8000 ==="
 cd server
-nohup python manage.py runserver 0.0.0.0:8000 > ~/django.log 2>&1 &
+nohup python3 manage.py runserver 0.0.0.0:8000 > ~/django.log 2>&1 &
 DJANGO_PID=$!
 echo "Django PID: $DJANGO_PID"
-sleep 3
+sleep 4
 
 # Check Django is alive
 if ! kill -0 $DJANGO_PID 2>/dev/null; then
@@ -24,10 +22,11 @@ if ! kill -0 $DJANGO_PID 2>/dev/null; then
 fi
 echo "Django is running at http://localhost:8000"
 
-# Start ngrok
 cd ..
+
+# Start ngrok
 if [ -z "$NGROK_AUTHTOKEN" ]; then
-    echo "WARNING: NGROK_AUTHTOKEN not set. ngrok will work but URL changes every restart."
+    echo "Note: NGROK_AUTHTOKEN not set. URL will be random."
     echo "Get a free authtoken at: https://dashboard.ngrok.com/get-started/your-authtoken"
 fi
 
