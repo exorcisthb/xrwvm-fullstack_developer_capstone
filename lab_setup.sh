@@ -17,12 +17,10 @@ echo "=== [2/6] Pulling latest changes ==="
 git pull origin main
 
 echo "=== [3/6] Installing Python dependencies ==="
-# Lab's pip (22.0.2) is old and doesn't support --break-system-packages.
-# Install into the system site-packages directly with --target so it works
-# even on a protected dist-packages.
-SITE_PKGS="/usr/local/lib/python3.10/dist-packages"
-echo "Installing into: $SITE_PKGS"
-python3 -m pip install --quiet --target="$SITE_PKGS" -r server/requirements.txt
+# /usr/local/lib is not writable. Use --user to install into ~/.local/.
+# Older pip on this lab doesn't support --break-system-packages, so --user is the safe path.
+python3 -m pip install --quiet --user --upgrade pip
+python3 -m pip install --quiet --user -r server/requirements.txt
 # Sanity check
 python3 -c "import django; print('Django version:', django.__version__)" || { echo "Django install FAILED"; exit 1; }
 
