@@ -40,8 +40,14 @@ if [ ! -x "./cloudflared" ]; then
     ./cloudflared --version || { echo "cloudflared not executable or corrupt"; exit 1; }
 fi
 
-echo "=== [6/6] Setup complete ==="
+echo "=== [6/6] Installing Playwright (for screenshots) ==="
+python3 -m pip install --quiet --user playwright
+python3 -m playwright install --with-deps chromium 2>/dev/null || python3 -m playwright install chromium
+
+echo "=== Setup complete ==="
 echo ""
-echo "To run the app, use:"
+echo "To run the app + capture deployment URL, use:"
 echo "  bash start_cloudflared.sh"
+echo "To capture submission screenshots (Tasks 25-28), use:"
+echo "  python3 take_screenshots.py"
 echo ""
