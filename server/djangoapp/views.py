@@ -168,8 +168,13 @@ def get_dealer_by_id(request, dealer_id):
 
 def get_dealers_by_state(request, state):
     """GET /djangoapp/dealers/state/<state> - dealers in a state."""
-    state = state.upper()
-    dealers = Dealer.objects.filter(state=state)
+    state_abbr = state.upper()
+    if len(state) > 2:
+        for code, name in Dealer.STATE_CHOICES:
+            if name.upper() == state.upper():
+                state_abbr = code
+                break
+    dealers = Dealer.objects.filter(state=state_abbr)
     if not dealers.exists():
         return JsonResponse({'status': False, 'error': f'No dealers found in {state}'}, status=404)
     return JsonResponse({
@@ -205,6 +210,8 @@ def serialize_dealer(d, include_contact=True, minimal=False):
         'zip': d.zip_code,
         'latitude': d.latitude,
         'longitude': d.longitude,
+        'lat': d.latitude,
+        'long': d.longitude,
     }
     if include_contact:
         data.update({
@@ -218,7 +225,7 @@ def serialize_dealer(d, include_contact=True, minimal=False):
 
 def serialize_dealer_state(d):
     """Fields for /dealers/state/<state>: id, full_name, short_name,
-    city, state, address, zip, latitude, longitude. NO phone/email."""
+    city, state, address, zip, latitude, longitude, lat, long. NO phone/email."""
     return {
         'id': d.id,
         'full_name': d.full_name,
@@ -229,6 +236,8 @@ def serialize_dealer_state(d):
         'zip': d.zip_code,
         'latitude': d.latitude,
         'longitude': d.longitude,
+        'lat': d.latitude,
+        'long': d.longitude,
     }
 
 
@@ -390,31 +399,20 @@ def analyze_review(request):
         except json.JSONDecodeError:
             text = ''
     if not text:
-        return JsonResponse({'status': False, 'error': 'text is required'}, status=400)
+        return JsonResponse({'error': 'text is required'}, status=400)
     sentiment, score = analyze_sentiment(text)
     return JsonResponse({
-        'status': True,
-        'text': text,
         'sentiment': sentiment,
-        'score': score,
     })
 
 
 def analyze_review_path(request, text):
-    """GET /djangoapp/analyze/<text> - analyze sentiment of a review text.
-
-    Same response as /analyze?text= but the review text is part of the URL
-    path, e.g. /djangoapp/analyze/Fantastic%20services
-    """
-    # Unquote in case the URL contains percent-escaped characters.
+    """GET /djangoapp/analyze/<text> - analyze sentiment of a review text."""
     from urllib.parse import unquote
     text = unquote(text)
     if not text:
-        return JsonResponse({'status': False, 'error': 'text is required'}, status=400)
+        return JsonResponse({'error': 'text is required'}, status=400)
     sentiment, score = analyze_sentiment(text)
     return JsonResponse({
-        'status': True,
-        'text': text,
         'sentiment': sentiment,
-        'score': score,
     })

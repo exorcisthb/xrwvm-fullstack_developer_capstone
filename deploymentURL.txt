@@ -1,16 +1,1 @@
-================================================================================
-Task 24: Deployment URL for Django application
-================================================================================
-
-Your deployed Django application URL goes here.
-
-Example formats (replace with your actual deployment URL):
-  - Heroku:    https://your-app-name.herokuapp.com
-  - Render:    https://your-app-name.onrender.com
-  - Railway:   https://your-app-name.up.railway.app
-  - Code Engine: https://your-app-name.us-south.codeengine.appdomain.cloud
-
-DEPLOYMENT_URL = https://your-app-name.onrender.com
-
-Once you deploy the `server/` folder to your hosting provider, replace the
-URL above and submit this file for Task 24.
+https://xrwvm-8000.proxy.cognitiveclass.ai

@@ -18,7 +18,16 @@
     <div class="review-card">
         <div class="review-header">
             <strong>{{ review.name }}</strong>
-            <span class="sentiment sentiment-{{ review.sentiment }}">{{ review.sentiment }}</span>
+            <span class="sentiment sentiment-{{ review.sentiment }}">
+                {% if review.sentiment == 'positive' %}
+                <img src="/static/happy.png" alt="positive" style="width:20px;height:20px;vertical-align:middle;margin-right:5px;">
+                {% elif review.sentiment == 'negative' %}
+                <img src="/static/sad.png" alt="negative" style="width:20px;height:20px;vertical-align:middle;margin-right:5px;">
+                {% else %}
+                <img src="/static/neutral.png" alt="neutral" style="width:20px;height:20px;vertical-align:middle;margin-right:5px;">
+                {% endif %}
+                {{ review.sentiment|upper }}
+            </span>
         </div>
         <p class="review-text">{{ review.review_text }}</p>
         <small class="review-date">{{ review.created_at|date:"M d, Y" }}</small>

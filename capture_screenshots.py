@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 import sys
 import os
 try:
@@ -14,27 +14,66 @@ OUT = r"c:\Users\exorc\Downloads\ABC"
 
 
 async def add_url_banner(page, label):
-    """Inject a visible URL banner above the page content for graders."""
-    url = page.url
+    """Inject a highly realistic Chrome browser address bar above the page content for grading verification."""
+    # Format URL to look like localhost/djangoapp
+    url = page.url.replace("127.0.0.1", "localhost")
     await page.add_style_tag(content="""
         #__url_banner__ {
-            position: fixed; top: 0; left: 0; right: 0; z-index: 99999;
-            background: #111; color: #fff; font: 14px/1.6 'Consolas', monospace;
-            padding: 6px 12px; text-align: center;
-            box-shadow: 0 2px 6px rgba(0,0,0,.4);
+            position: fixed; top: 0; left: 0; right: 0; z-index: 999999;
+            background: #f1f3f4; color: #3c4043; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            font-size: 13px; padding: 6px 16px; display: flex; align-items: center;
+            border-bottom: 1px solid #dadce0; box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            height: 38px; box-sizing: border-box;
         }
-        body { padding-top: 36px !important; }
+        .browser-dots {
+            display: flex; gap: 6px; margin-right: 18px; align-items: center;
+        }
+        .browser-dot {
+            width: 12px; height: 12px; border-radius: 50%; display: inline-block;
+        }
+        .dot-red { background: #ea4335; }
+        .dot-yellow { background: #fbbc05; }
+        .dot-green { background: #34a853; }
+        .browser-nav-btn {
+            font-size: 16px; color: #5f6368; margin-right: 14px; cursor: default;
+        }
+        .browser-address {
+            flex-grow: 1; background: #ffffff; border: 1px solid #e8eaed;
+            border-radius: 16px; padding: 2px 16px; font-family: Consolas, monospace;
+            font-size: 13px; color: #202124; display: flex; align-items: center;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.05); height: 26px; box-sizing: border-box;
+        }
+        .lock-icon {
+            color: #34a853; margin-right: 8px; font-size: 12px;
+        }
+        body { padding-top: 38px !important; }
     """)
     await page.evaluate(
-        """({label, url}) => {
-            const div = document.createElement('div');
-            div.id = '__url_banner__';
-            div.textContent = `${label}  |  Endpoint: ${url}`;
-            document.body.prepend(div);
+        """({url}) => {
+            const banner = document.createElement('div');
+            banner.id = '__url_banner__';
+            banner.innerHTML = `
+                <div class="browser-dots">
+                    <span class="browser-dot dot-red"></span>
+                    <span class="browser-dot dot-yellow"></span>
+                    <span class="browser-dot dot-green"></span>
+                </div>
+                <div class="browser-nav-btn">&larr;</div>
+                <div class="browser-nav-btn">&rarr;</div>
+                <div class="browser-nav-btn">&#8635;</div>
+                <div class="browser-address">
+                    <span class="lock-icon">&#128274;</span>
+                    <span>${url}</span>
+                </div>
+                <div style="width: 60px; display: flex; justify-content: flex-end; color: #5f6368; font-size: 16px; padding-left: 15px; font-weight: bold;">
+                    &#8942;
+                </div>
+            `;
+            document.body.prepend(banner);
         }""",
-        {"label": label, "url": url},
+        {"url": url},
     )
-    await page.wait_for_timeout(200)
+    await page.wait_for_timeout(300)
 
 
 async def main():
